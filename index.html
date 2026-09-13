@@ -1,0 +1,1754 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>STAR PAYMENT</title>
+
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --accent: #ff2da6;
+            --accent-2: #ff63c0;
+            --accent-dark: #a80065;
+
+            --bg: #050507;
+            --bg-2: #0c0c11;
+
+            --glass: rgba(255, 255, 255, 0.055);
+            --glass-strong: rgba(255, 255, 255, 0.09);
+
+            --border: rgba(255, 255, 255, 0.11);
+            --text: #ffffff;
+            --muted: #92929e;
+
+            --success: #57ffb0;
+        }
+
+        body.blue {
+            --accent: #2d9cff;
+            --accent-2: #63bbff;
+            --accent-dark: #0062a8;
+        }
+
+        body.purple {
+            --accent: #9b5cff;
+            --accent-2: #c08cff;
+            --accent-dark: #5720a8;
+        }
+
+        body.green {
+            --accent: #21e89b;
+            --accent-2: #67ffc3;
+            --accent-dark: #00925d;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           BACKGROUND
+        ========================= */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(
+                    circle at 50% -10%,
+                    rgba(255, 45, 166, 0.20),
+                    transparent 42%
+                ),
+                radial-gradient(
+                    circle at 100% 80%,
+                    rgba(255, 45, 166, 0.08),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    145deg,
+                    #030305,
+                    #08080d 50%,
+                    #030305
+                );
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: .25;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb.one {
+            width: 230px;
+            height: 230px;
+            background: var(--accent);
+            top: -80px;
+            left: -80px;
+        }
+
+        .orb.two {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-dark);
+            right: -80px;
+            bottom: 10%;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+
+            50% {
+                transform: translate3d(20px, -25px, 0);
+            }
+        }
+
+        /* =========================
+           APP
+        ========================= */
+
+        .app {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            margin: auto;
+            padding: 18px 16px 30px;
+        }
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 21px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.18),
+                    rgba(255,255,255,.035)
+                );
+
+            border: 1px solid rgba(255,255,255,.14);
+
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,.16),
+                0 0 25px rgba(255,45,166,.12);
+        }
+
+        .brand-title {
+            font-weight: 800;
+            letter-spacing: .7px;
+            font-size: 15px;
+        }
+
+        .brand-subtitle {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* SETTINGS */
+
+        .settings-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+
+            border: 1px solid var(--border);
+            background: var(--glass);
+
+            color: white;
+            font-size: 18px;
+
+            cursor: pointer;
+
+            transition: .25s;
+        }
+
+        .settings-btn:hover,
+        .settings-btn:active {
+            transform: rotate(25deg) scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 0 25px rgba(255,45,166,.25);
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            text-align: center;
+            margin-top: 14px;
+            margin-bottom: 25px;
+        }
+
+        .star {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 44px;
+
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.16),
+                    rgba(255,45,166,.08),
+                    rgba(255,255,255,.025)
+                );
+
+            border: 1px solid rgba(255,255,255,.16);
+
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,.2),
+                0 0 45px rgba(255,45,166,.18);
+
+            animation: starPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes starPulse {
+            0%, 100% {
+                transform: translateY(0);
+                box-shadow:
+                    inset 0 1px 1px rgba(255,255,255,.2),
+                    0 0 35px rgba(255,45,166,.16);
+            }
+
+            50% {
+                transform: translateY(-5px);
+                box-shadow:
+                    inset 0 1px 1px rgba(255,255,255,.2),
+                    0 0 55px rgba(255,45,166,.28);
+            }
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 850;
+            letter-spacing: -.7px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(
+                100deg,
+                #fff,
+                var(--accent-2),
+                var(--accent)
+            );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+            margin: 10px auto 0;
+            max-width: 340px;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            position: relative;
+            padding: 20px;
+
+            border-radius: 25px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.095),
+                    rgba(255,255,255,.035)
+                );
+
+            border: 1px solid var(--border);
+
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,.08),
+                0 20px 70px rgba(0,0,0,.4);
+
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    115deg,
+                    transparent 20%,
+                    rgba(255,255,255,.045),
+                    transparent 45%
+                );
+
+            pointer-events: none;
+        }
+
+        .label {
+            display: block;
+            color: #c4c4ce;
+            font-size: 12px;
+            font-weight: 650;
+            margin-bottom: 9px;
+        }
+
+        /* =========================
+           INPUT
+        ========================= */
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .amount-input {
+            width: 100%;
+            height: 64px;
+
+            border-radius: 17px;
+
+            border: 1px solid rgba(255,255,255,.12);
+
+            background:
+                rgba(0,0,0,.28);
+
+            color: white;
+
+            padding: 0 75px 0 18px;
+
+            font-size: 22px;
+            font-weight: 750;
+
+            outline: none;
+
+            transition: .25s;
+        }
+
+        .amount-input::placeholder {
+            color: #595963;
+        }
+
+        .amount-input:focus {
+            border-color: var(--accent);
+
+            box-shadow:
+                0 0 0 3px rgba(255,45,166,.08),
+                0 0 30px rgba(255,45,166,.12);
+        }
+
+        .currency {
+            position: absolute;
+            right: 17px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            font-size: 13px;
+            font-weight: 800;
+
+            color: var(--accent-2);
+        }
+
+        /* =========================
+           QUICK AMOUNTS
+        ========================= */
+
+        .quick {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+
+            margin-top: 10px;
+        }
+
+        .quick button {
+            height: 37px;
+
+            border-radius: 11px;
+
+            background: rgba(255,255,255,.045);
+            border: 1px solid rgba(255,255,255,.08);
+
+            color: #cfcfd8;
+
+            cursor: pointer;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            transition: .2s;
+        }
+
+        .quick button:hover,
+        .quick button:active {
+            background: rgba(255,45,166,.10);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           MAIN BUTTON
+        ========================= */
+
+        .main-btn {
+            position: relative;
+
+            width: 100%;
+            height: 60px;
+
+            margin-top: 18px;
+
+            border: none;
+            border-radius: 17px;
+
+            color: white;
+
+            font-size: 15px;
+            font-weight: 850;
+
+            cursor: pointer;
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    var(--accent-dark),
+                    var(--accent),
+                    var(--accent-2),
+                    var(--accent)
+                );
+
+            background-size: 300% 100%;
+
+            box-shadow:
+                0 10px 35px rgba(255,45,166,.23),
+                inset 0 1px 1px rgba(255,255,255,.3);
+
+            animation: gradientMove 5s ease infinite;
+
+            transition: .22s;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .main-btn::after {
+            content: "";
+
+            position: absolute;
+            top: 0;
+            left: -100%;
+
+            width: 60%;
+            height: 100%;
+
+            transform: skewX(-20deg);
+
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.28),
+                transparent
+            );
+
+            transition: .5s;
+        }
+
+        .main-btn:hover::after,
+        .main-btn:active::after {
+            left: 140%;
+        }
+
+        .main-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 14px 45px rgba(255,45,166,.34),
+                inset 0 1px 1px rgba(255,255,255,.3);
+        }
+
+        .main-btn:active {
+            transform: scale(.985);
+        }
+
+        /* =========================
+           INFO
+        ========================= */
+
+        .info {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            flex: 1;
+
+            padding: 12px;
+
+            border-radius: 15px;
+
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.065);
+
+            text-align: center;
+        }
+
+        .info-icon {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .info-text {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           SECOND SCREEN
+        ========================= */
+
+        .screen {
+            display: none;
+            animation: screenIn .35s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes screenIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+
+            border: none;
+            background: none;
+
+            color: #aaaab4;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        .payment-card {
+            text-align: center;
+        }
+
+        .payment-icon {
+            width: 72px;
+            height: 72px;
+
+            margin: 5px auto 18px;
+
+            border-radius: 23px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 31px;
+
+            background: rgba(255,45,166,.08);
+            border: 1px solid rgba(255,45,166,.25);
+
+            box-shadow:
+                0 0 35px rgba(255,45,166,.12);
+        }
+
+        .payment-card h2 {
+            font-size: 23px;
+            margin-bottom: 8px;
+        }
+
+        .payment-card > p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .sum-box {
+            margin-top: 20px;
+            padding: 18px;
+
+            border-radius: 18px;
+
+            background: rgba(255,255,255,.045);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sum-label {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .sum-value {
+            font-size: 30px;
+            font-weight: 850;
+            margin-top: 4px;
+        }
+
+        /* CARD PLACEHOLDER */
+
+        .requisites {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .req-label {
+            display: block;
+            color: #a7a7b1;
+            font-size: 11px;
+            margin-bottom: 7px;
+        }
+
+        .req-value {
+            min-height: 54px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 15px;
+
+            border-radius: 15px;
+
+            background: rgba(0,0,0,.25);
+            border: 1px solid rgba(255,255,255,.08);
+
+            color: #777783;
+
+            font-size: 13px;
+        }
+
+        .warning {
+            margin-top: 12px;
+
+            padding: 11px 13px;
+
+            border-radius: 13px;
+
+            background: rgba(255,190,50,.05);
+            border: 1px solid rgba(255,190,50,.10);
+
+            color: #aaa9a0;
+
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        /* =========================
+           SETTINGS PANEL
+        ========================= */
+
+        .settings-panel {
+            margin-top: 15px;
+            display: none;
+
+            padding: 16px;
+
+            border-radius: 20px;
+
+            background: rgba(255,255,255,.045);
+            border: 1px solid rgba(255,255,255,.08);
+
+            animation: screenIn .25s ease;
+        }
+
+        .settings-panel.open {
+            display: block;
+        }
+
+        .settings-title {
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 12px 0;
+
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-name {
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .setting-description {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .languages,
+        .colors {
+            display: flex;
+            gap: 6px;
+        }
+
+        .lang-btn,
+        .color-btn {
+            height: 31px;
+            min-width: 39px;
+
+            padding: 0 9px;
+
+            border-radius: 9px;
+
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+
+            color: #aaa;
+
+            cursor: pointer;
+
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .lang-btn.active,
+        .lang-btn:hover {
+            color: white;
+            border-color: var(--accent);
+            background: rgba(255,45,166,.09);
+        }
+
+        .color-btn {
+            min-width: 28px;
+            width: 28px;
+            padding: 0;
+        }
+
+        .color-btn.pink {
+            background: #ff2da6;
+        }
+
+        .color-btn.blue {
+            background: #2d9cff;
+        }
+
+        .color-btn.purple {
+            background: #9b5cff;
+        }
+
+        .color-btn.green {
+            background: #21e89b;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+
+            color: #555560;
+
+            font-size: 9px;
+            letter-spacing: .4px;
+        }
+
+        /* =========================
+           TOAST
+        ========================= */
+
+        .toast {
+            position: fixed;
+
+            left: 50%;
+            bottom: 22px;
+
+            transform: translate(-50%, 100px);
+
+            z-index: 100;
+
+            padding: 12px 17px;
+
+            border-radius: 13px;
+
+            background: rgba(20,20,25,.92);
+            border: 1px solid rgba(255,255,255,.1);
+
+            backdrop-filter: blur(20px);
+
+            font-size: 12px;
+
+            box-shadow: 0 10px 40px rgba(0,0,0,.5);
+
+            transition: .3s;
+
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 380px) {
+
+            .app {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .hero h1 {
+                font-size: 25px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .quick {
+                gap: 5px;
+            }
+
+            .quick button {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="background">
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+</div>
+
+<div class="app">
+
+    <!-- TOP -->
+    <div class="topbar">
+
+        <div class="brand">
+            <div class="brand-icon">⭐</div>
+
+            <div>
+                <div class="brand-title">STAR PAYMENT</div>
+                <div class="brand-subtitle" data-i18n="secure">
+                    Secure payment
+                </div>
+            </div>
+        </div>
+
+        <button class="settings-btn" onclick="toggleSettings()">
+            ⚙
+        </button>
+
+    </div>
+
+
+    <!-- SETTINGS -->
+    <div class="settings-panel" id="settingsPanel">
+
+        <div class="settings-title" data-i18n="settings">
+            Настройки
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+                <div class="setting-name" data-i18n="language">
+                    Язык
+                </div>
+
+                <div class="setting-description" data-i18n="languageDesc">
+                    Выберите язык интерфейса
+                </div>
+            </div>
+
+            <div class="languages">
+
+                <button
+                    class="lang-btn active"
+                    onclick="setLanguage('ru')">
+                    RU
+                </button>
+
+                <button
+                    class="lang-btn"
+                    onclick="setLanguage('en')">
+                    EN
+                </button>
+
+                <button
+                    class="lang-btn"
+                    onclick="setLanguage('uk')">
+                    UA
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="setting-row">
+
+            <div>
+                <div class="setting-name" data-i18n="theme">
+                    Цвет
+                </div>
+
+                <div class="setting-description" data-i18n="themeDesc">
+                    Выберите цвет интерфейса
+                </div>
+            </div>
+
+            <div class="colors">
+
+                <button
+                    class="color-btn pink"
+                    onclick="setTheme('pink')">
+                </button>
+
+                <button
+                    class="color-btn blue"
+                    onclick="setTheme('blue')">
+                </button>
+
+                <button
+                    class="color-btn purple"
+                    onclick="setTheme('purple')">
+                </button>
+
+                <button
+                    class="color-btn green"
+                    onclick="setTheme('green')">
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         SCREEN 1
+    ========================== -->
+
+    <section id="screen1" class="screen active">
+
+        <div class="hero">
+
+            <div class="star">
+                ⭐
+            </div>
+
+            <h1>
+                <span data-i18n="title1">Пополнение</span>
+                <span class="gradient-text">
+                    Stars
+                </span>
+            </h1>
+
+            <p data-i18n="description">
+                Укажите количество Telegram Stars,
+                которое хотите приобрести.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <label class="label" data-i18n="amount">
+                Количество Stars
+            </label>
+
+            <div class="input-wrap">
+
+                <input
+                    id="amount"
+                    class="amount-input"
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    placeholder="Введите сумму"
+                    data-placeholder="Введите сумму"
+                >
+
+                <span class="currency">
+                    ⭐ STARS
+                </span>
+
+            </div>
+
+
+            <div class="quick">
+
+                <button onclick="setAmount(100)">
+                    100 ⭐
+                </button>
+
+                <button onclick="setAmount(500)">
+                    500 ⭐
+                </button>
+
+                <button onclick="setAmount(1000)">
+                    1K ⭐
+                </button>
+
+                <button onclick="setAmount(5000)">
+                    5K ⭐
+                </button>
+
+            </div>
+
+
+            <button
+                class="main-btn"
+                onclick="nextStep()">
+
+                <span data-i18n="next">
+                    Далее
+                </span>
+
+                <span> →</span>
+
+            </button>
+
+
+            <div class="info">
+
+                <div class="info-item">
+                    <div class="info-icon">⚡</div>
+                    <div
+                        class="info-text"
+                        data-i18n="fast">
+                        Быстро
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">🔒</div>
+                    <div
+                        class="info-text"
+                        data-i18n="safe">
+                        Безопасно
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">💎</div>
+                    <div
+                        class="info-text"
+                        data-i18n="simple">
+                        Просто
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         SCREEN 2
+    ========================== -->
+
+    <section id="screen2" class="screen">
+
+        <button
+            class="back-btn"
+            onclick="goBack()">
+
+            ←
+            <span data-i18n="back">
+                Назад
+            </span>
+
+        </button>
+
+
+        <div class="card payment-card">
+
+            <div class="payment-icon">
+                💳
+            </div>
+
+            <h2 data-i18n="payment">
+                Оплата
+            </h2>
+
+            <p data-i18n="paymentDesc">
+                Переведите указанную сумму по реквизитам ниже.
+            </p>
+
+
+            <div class="sum-box">
+
+                <div
+                    class="sum-label"
+                    data-i18n="yourAmount">
+                    Ваша сумма
+                </div>
+
+                <div class="sum-value">
+                    <span id="finalAmount">0</span>
+                    ⭐
+                </div>
+
+            </div>
+
+
+            <div class="requisites">
+
+                <span
+                    class="req-label"
+                    data-i18n="card">
+                    Банковская карта
+                </span>
+
+                <div
+                    class="req-value"
+                    data-i18n="cardPlaceholder">
+                    Здесь будут указаны реквизиты
+                </div>
+
+            </div>
+
+
+            <div class="requisites">
+
+                <span
+                    class="req-label"
+                    data-i18n="recipient">
+                    Получатель
+                </span>
+
+                <div
+                    class="req-value"
+                    data-i18n="recipientPlaceholder">
+                    Здесь будет указано имя получателя
+                </div>
+
+            </div>
+
+
+            <div class="warning">
+                ⚠️
+                <span data-i18n="warning">
+                    Реквизиты пока являются демонстрационными.
+                    После подключения backend сюда можно
+                    автоматически подставлять актуальные данные.
+                </span>
+            </div>
+
+
+            <button
+                class="main-btn"
+                style="margin-top:18px"
+                onclick="showToast()">
+
+                <span data-i18n="paid">
+                    Я оплатил
+                </span>
+
+                ✓
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <div class="footer">
+        STAR PAYMENT • TELEGRAM MINI APP
+    </div>
+
+</div>
+
+
+<div class="toast" id="toast">
+    ✓ Спасибо! Проверка платежа будет добавлена позже.
+</div>
+
+
+<script>
+
+    /* =====================================
+       TELEGRAM
+    ====================================== */
+
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+        tg.ready();
+        tg.expand();
+
+        try {
+            tg.setHeaderColor("#050507");
+            tg.setBackgroundColor("#050507");
+        } catch (e) {}
+    }
+
+
+    /* =====================================
+       AMOUNT
+    ====================================== */
+
+    const amountInput = document.getElementById("amount");
+
+    function setAmount(value) {
+        amountInput.value = value;
+
+        amountInput.focus();
+
+        amountInput.animate(
+            [
+                { transform: "scale(1)" },
+                { transform: "scale(1.02)" },
+                { transform: "scale(1)" }
+            ],
+            {
+                duration: 220,
+                easing: "ease-out"
+            }
+        );
+    }
+
+
+    function nextStep() {
+
+        const value = parseInt(amountInput.value);
+
+        if (!value || value < 1) {
+
+            amountInput.animate(
+                [
+                    { transform: "translateX(0)" },
+                    { transform: "translateX(-7px)" },
+                    { transform: "translateX(7px)" },
+                    { transform: "translateX(0)" }
+                ],
+                {
+                    duration: 280
+                }
+            );
+
+            amountInput.focus();
+
+            return;
+        }
+
+        document.getElementById("finalAmount").textContent =
+            value.toLocaleString("ru-RU");
+
+        document.getElementById("screen1")
+            .classList.remove("active");
+
+        document.getElementById("screen2")
+            .classList.add("active");
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    function goBack() {
+
+        document.getElementById("screen2")
+            .classList.remove("active");
+
+        document.getElementById("screen1")
+            .classList.add("active");
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    /* =====================================
+       SETTINGS
+    ====================================== */
+
+    function toggleSettings() {
+
+        const panel =
+            document.getElementById("settingsPanel");
+
+        panel.classList.toggle("open");
+    }
+
+
+    /* =====================================
+       THEMES
+    ====================================== */
+
+    function setTheme(theme) {
+
+        document.body.classList.remove(
+            "blue",
+            "purple",
+            "green"
+        );
+
+        if (theme !== "pink") {
+            document.body.classList.add(theme);
+        }
+
+        localStorage.setItem("theme", theme);
+    }
+
+
+    const savedTheme =
+        localStorage.getItem("theme");
+
+    if (savedTheme) {
+        setTheme(savedTheme);
+    }
+
+
+    /* =====================================
+       LANGUAGES
+    ====================================== */
+
+    const translations = {
+
+        ru: {
+
+            secure: "Безопасная оплата",
+
+            settings: "Настройки",
+
+            language: "Язык",
+
+            languageDesc:
+                "Выберите язык интерфейса",
+
+            theme: "Цвет",
+
+            themeDesc:
+                "Выберите цвет интерфейса",
+
+            title1: "Пополнение",
+
+            description:
+                "Укажите количество Telegram Stars, которое хотите приобрести.",
+
+            amount:
+                "Количество Stars",
+
+            next:
+                "Далее",
+
+            fast:
+                "Быстро",
+
+            safe:
+                "Безопасно",
+
+            simple:
+                "Просто",
+
+            back:
+                "Назад",
+
+            payment:
+                "Оплата",
+
+            paymentDesc:
+                "Переведите указанную сумму по реквизитам ниже.",
+
+            yourAmount:
+                "Ваша сумма",
+
+            card:
+                "Банковская карта",
+
+            cardPlaceholder:
+                "Здесь будут указаны реквизиты",
+
+            recipient:
+                "Получатель",
+
+            recipientPlaceholder:
+                "Здесь будет указано имя получателя",
+
+            warning:
+                "Реквизиты пока являются демонстрационными. После подключения backend сюда можно автоматически подставлять актуальные данные.",
+
+            paid:
+                "Я оплатил"
+        },
+
+
+        en: {
+
+            secure: "Secure payment",
+
+            settings: "Settings",
+
+            language: "Language",
+
+            languageDesc:
+                "Choose interface language",
+
+            theme: "Color",
+
+            themeDesc:
+                "Choose interface color",
+
+            title1: "Top up",
+
+            description:
+                "Enter the amount of Telegram Stars you want to purchase.",
+
+            amount:
+                "Amount of Stars",
+
+            next:
+                "Continue",
+
+            fast:
+                "Fast",
+
+            safe:
+                "Secure",
+
+            simple:
+                "Simple",
+
+            back:
+                "Back",
+
+            payment:
+                "Payment",
+
+            paymentDesc:
+                "Transfer the specified amount using the details below.",
+
+            yourAmount:
+                "Your amount",
+
+            card:
+                "Bank card",
+
+            cardPlaceholder:
+                "Payment details will appear here",
+
+            recipient:
+                "Recipient",
+
+            recipientPlaceholder:
+                "Recipient name will appear here",
+
+            warning:
+                "The payment details are currently placeholders. After connecting the backend, actual details can be inserted automatically.",
+
+            paid:
+                "I paid"
+        },
+
+
+        uk: {
+
+            secure: "Безпечна оплата",
+
+            settings: "Налаштування",
+
+            language: "Мова",
+
+            languageDesc:
+                "Оберіть мову інтерфейсу",
+
+            theme: "Колір",
+
+            themeDesc:
+                "Оберіть колір інтерфейсу",
+
+            title1: "Поповнення",
+
+            description:
+                "Вкажіть кількість Telegram Stars, яку хочете придбати.",
+
+            amount:
+                "Кількість Stars",
+
+            next:
+                "Далі",
+
+            fast:
+                "Швидко",
+
+            safe:
+                "Безпечно",
+
+            simple:
+                "Просто",
+
+            back:
+                "Назад",
+
+            payment:
+                "Оплата",
+
+            paymentDesc:
+                "Перекажіть вказану суму за реквізитами нижче.",
+
+            yourAmount:
+                "Ваша сума",
+
+            card:
+                "Банківська картка",
+
+            cardPlaceholder:
+                "Тут будуть вказані реквізити",
+
+            recipient:
+                "Отримувач",
+
+            recipientPlaceholder:
+                "Тут буде вказано ім'я отримувача",
+
+            warning:
+                "Реквізити поки що демонстраційні. Після підключення backend сюди можна автоматично підставляти актуальні дані.",
+
+            paid:
+                "Я оплатив"
+        }
+
+    };
+
+
+    function setLanguage(lang) {
+
+        document
+            .querySelectorAll("[data-i18n]")
+            .forEach(element => {
+
+                const key =
+                    element.getAttribute("data-i18n");
+
+                if (translations[lang][key]) {
+                    element.textContent =
+                        translations[lang][key];
+                }
+
+            });
+
+
+        document
+            .querySelectorAll(".lang-btn")
+            .forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+
+        const active =
+            document.querySelector(
+                `.lang-btn[onclick="setLanguage('${lang}')"]`
+            );
+
+        if (active) {
+            active.classList.add("active");
+        }
+
+
+        amountInput.placeholder =
+            lang === "ru"
+                ? "Введите сумму"
+                : lang === "en"
+                    ? "Enter amount"
+                    : "Введіть суму";
+
+
+        localStorage.setItem(
+            "language",
+            lang
+        );
+    }
+
+
+    const savedLanguage =
+        localStorage.getItem("language") || "ru";
+
+    setLanguage(savedLanguage);
+
+
+    /* =====================================
+       TOAST
+    ====================================== */
+
+    function showToast() {
+
+        const toast =
+            document.getElementById("toast");
+
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000);
+    }
+
+
+    /* =====================================
+       ENTER KEY
+    ====================================== */
+
+    amountInput.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+                nextStep();
+            }
+
+        }
+    );
+
+
+    /* =====================================
+       INPUT CLEANING
+    ====================================== */
+
+    amountInput.addEventListener(
+        "input",
+        function() {
+
+            if (this.value < 0) {
+                this.value = 0;
+            }
+
+            if (this.value.length > 10) {
+                this.value =
+                    this.value.slice(0, 10);
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
+```
